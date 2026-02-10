@@ -97,11 +97,16 @@ export default function Services() {
     }).format(price)
   }, [])
 
-  const formatDuration = useCallback((minutes) => {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return hours ? `${hours}г ${mins}хв` : `${mins}хв`
-  }, [])
+const formatDuration = useCallback((minutes) => {
+  if (!minutes || isNaN(minutes) || minutes === 0) {
+    return '0хв'
+  }
+  const safeMinutes = Math.floor(Number(minutes))
+  const hours = Math.floor(safeMinutes / 60)
+  const mins = safeMinutes % 60
+  return hours ? `${hours}г ${mins}хв` : `${mins}хв`
+}, [])
+
 
   if (loading && services.length === 0) {
     return (
@@ -156,9 +161,7 @@ export default function Services() {
           
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Назва *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Назва *</label>
               <input 
                 name="name" 
                 value={formData.name} 
@@ -168,9 +171,7 @@ export default function Services() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ціна (грн) *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Ціна (грн) *</label>
               <input 
                 name="price" 
                 type="number" 
@@ -182,9 +183,7 @@ export default function Services() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Тривалість (хв) *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Тривалість (хв) *</label>
               <input 
                 name="durationMinutes" 
                 type="number" 
@@ -195,9 +194,7 @@ export default function Services() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Опис
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Опис</label>
               <textarea 
                 name="description" 
                 value={formData.description} 
@@ -227,7 +224,7 @@ export default function Services() {
         </div>
       )}
 
-      {/* СПИСОК */}
+      {/*НОВИЙ СПИСОК - Назва → Опис → Ціна */}
       {services.length === 0 && !loading ? (
         <div className="text-center py-20 bg-white rounded-2xl p-12 border-2 border-dashed border-gray-200">
           <div className="text-6xl mb-4">🛠️</div>
@@ -242,49 +239,54 @@ export default function Services() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
+          {services.map((service, index) => (
             <div 
-              key={service.id} 
+              key={`${service.id?.value || service.id || index}-${index}`}
               className="group bg-white p-6 rounded-xl shadow border hover:shadow-xl hover:border-emerald-300 transition-all duration-200"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-xl text-gray-900 truncate" title={service.name}>
-                    {service.name}
-                  </h3>
-                  <div className="text-2xl font-bold text-emerald-600 mt-1">
-                    {formatPrice(service.price)}
-                  </div>
-                </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all ml-4">
-                  <button 
-                    onClick={() => handleEdit(service)} 
-                    className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors" 
-                    title="Редагувати"
-                    disabled={loading}
-                  >
-                    ✏️
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(service.id)} 
-                    className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors" 
-                    title="Видалити"
-                    disabled={loading}
-                  >
-                    🗑️
-                  </button>
-                </div>
+              {/* 🔥 НАЗВА ЗВЕРХУ */}
+              <div className="mb-4">
+                <h3 className="font-bold text-xl text-gray-900 truncate" title={service.name || service.title}>
+                  {service.name || service.title}
+                </h3>
               </div>
-              <div className="text-sm space-y-2 text-gray-600 divide-y divide-gray-100">
-                <div className="py-2 flex justify-between">
-                  <span>Тривалість:</span>
+
+              {/* 🔥 ОПИС ПІД НАЗВОЮ */}
+              {service.description && (
+                <div className="mb-4 text-sm text-gray-600 line-clamp-2" title={service.description}>
+                  {service.description}
+                </div>
+              )}
+
+              {/* 🔥 ЦІНА + ТРИВАЛІСТЬ ЗВЕРХУ ПРАВОРУЧ */}
+              <div className="flex justify-between items-end mb-4">
+                <div className="text-sm text-gray-500">
+                  <span>Тривалість: </span>
                   <span className="font-medium">{formatDuration(service.durationMinutes)}</span>
                 </div>
-                {service.description && (
-                  <div className="py-2 text-xs line-clamp-2" title={service.description}>
-                    {service.description}
-                  </div>
-                )}
+                <div className="text-2xl font-bold text-emerald-600">
+                  {formatPrice(service.price)}
+                </div>
+              </div>
+
+              {/* 🔥 КНОПКИ */}
+              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                <button 
+                  onClick={() => handleEdit(service)} 
+                  className="flex-1 p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors" 
+                  title="Редагувати"
+                  disabled={loading}
+                >
+                  ✏️
+                </button>
+                <button 
+                  onClick={() => handleDelete(service)}  // ✅ Передаємо service!
+                  className="flex-1 p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors" 
+                  title="Видалити"
+                  disabled={loading}
+                >
+                  🗑️
+                </button>
               </div>
             </div>
           ))}

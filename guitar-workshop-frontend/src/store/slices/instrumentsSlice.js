@@ -22,7 +22,7 @@ export const createInstrument = createAsyncThunk(
         SerialNumber: instrument.SerialNumber,
         Status: instrument.Status,
         CustomerId: instrument.CustomerId,
-        RecieveDate: instrument.RecieveDate  // ✅ Залишаємо як є
+        RecieveDate: instrument.RecieveDate
       }
       
       const result = await api.instruments.create(apiData)
@@ -34,7 +34,7 @@ export const createInstrument = createAsyncThunk(
         serialNumber: apiData.SerialNumber,
         status: apiData.Status,
         customerId: apiData.CustomerId,
-        recieveDate: apiData.RecieveDate  // ✅ camelCase для фронту
+        recieveDate: apiData.RecieveDate
       }
     } catch (error) {
       return rejectWithValue(error.message)
@@ -48,7 +48,6 @@ export const updateInstrument = createAsyncThunk(
   'instruments/update', 
   async ({ id, instrument }, { dispatch, rejectWithValue }) => {
     try {
-      // 🔥 1. Повне оновлення основних полів (PUT)
       const updateData = {
         Model: instrument.Model || instrument.model,
         SerialNumber: instrument.SerialNumber || instrument.serialNumber,
@@ -58,12 +57,10 @@ export const updateInstrument = createAsyncThunk(
       
       await api.instruments.update(id, updateData)
       
-      // 🔥 2. ОКРЕМЕ оновлення статусу (PATCH)!
       if (instrument.Status || instrument.status) {
         await api.instruments.updateStatus(id, instrument.Status || instrument.status)
       }
       
-      // ✅ Повертаємо повний об'єкт
       return { 
         id, 
         Model: updateData.Model,
@@ -135,7 +132,6 @@ const instrumentsSlice = createSlice({
         state.error = action.payload || action.error?.message || 'Помилка створення'
       })
       
-      // UPDATE ✅ ВИПРАВЛЕНО!
       .addCase(updateInstrument.pending, (state) => {
         state.loading = true
         state.error = null
@@ -144,7 +140,6 @@ const instrumentsSlice = createSlice({
         state.loading = false
         console.log('🔥 UPDATE PAYLOAD:', action.payload) // DEBUG
         
-        // ✅ БЕЗПЕЧНА перевірка ID
         if (action.payload && action.payload.id) {
           const index = state.items.findIndex(i => i.id === action.payload.id)
           if (index !== -1) {
@@ -157,7 +152,6 @@ const instrumentsSlice = createSlice({
         state.error = action.payload || action.error?.message || 'Помилка оновлення'
       })
       
-      // DELETE
       .addCase(deleteInstrument.pending, (state) => {
         state.loading = true
         state.error = null
