@@ -2,53 +2,39 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { api } from '../../lib/api'
 
 export const fetchOrders = createAsyncThunk(
-  'orders/fetchAll', 
-  async (_, { dispatch, rejectWithValue }) => {
+  'orders/fetchAll',
+  async (_, { rejectWithValue }) => {
     try {
-      const orders = await api.orders.getAll()
-      
-      // 🔥 Завантажуємо послуги для кожного замовлення
-      const ordersWithServices = await Promise.all(
-        orders.map(async (order) => {
-          try {
-            // const services = await api.orders.getServices(order.id)
-            return { ...order, services: [] } // Поки порожні
-          } catch {
-            return order
-          }
-        })
-      )
-      
-      return ordersWithServices
-    } catch (error) {
-      return rejectWithValue(error.message)
+      return await api.orders.getAll()
+    } catch (e) {
+      return rejectWithValue(e.message)
     }
   }
 )
 
 
+
+// ordersSlice.js
 export const createOrder = createAsyncThunk(
-  'orders/create', 
-  async (orderData, { rejectWithValue }) => {
+  'orders/create',
+  async (request, { rejectWithValue }) => {
     try {
-      const result = await api.orders.create(orderData)
-      return { ...orderData, id: result.id || crypto.randomUUID() }
-    } catch (error) {
-      return rejectWithValue(error.message)
+      const data = await api.orders.create(request)
+      return data
+    } catch (e) {
+      return rejectWithValue(e.message)
     }
   }
 )
 
 export const updateOrder = createAsyncThunk(
-  'orders/update', 
-  async ({ id, orderData }, { rejectWithValue }) => {
-    console.log('🔍 SLICE UPDATE ID:', id, typeof id)  // 🔥 ДІАГНОСТИКА!
-    
+  'orders/update',
+  async ({id, request}, { rejectWithValue }) => {
     try {
-      const result = await api.orders.update(String(id), orderData)  // 🔥 STRING!
-      return { id: String(id), ...orderData }  // 🔥 Повертаємо STRING ID!
-    } catch (error) {
-      return rejectWithValue(error.message)
+      await api.orders.update(id, request)
+      return { id, ...request }
+    } catch (e) {
+      return rejectWithValue(e.message)
     }
   }
 )

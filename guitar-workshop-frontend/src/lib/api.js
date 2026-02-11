@@ -76,34 +76,37 @@ export const api = {
   delete: (id) => apiRequest(`/instruments/${id}`, { method: 'DELETE' })
 },
 
-
 orders: {
   getAll: () => apiRequest('/orders'),
   getById: (id) => apiRequest(`/orders/${id}`),
+
   create: (data) => apiRequest('/orders', { 
     method: 'POST', 
     body: JSON.stringify({
       instrumentId: data.instrumentId,
       orderDate: `${data.orderDate}T00:00:00Z`,
       status: data.status,
-      notes: data.notes
+      notes: data.notes?.trim() || "-"
     }) 
   }),
+
   update: (id, data) => apiRequest(`/orders/${id}`, { 
     method: 'PUT', 
     body: JSON.stringify({
-      instrumentId: data.instrumentId,
-      orderDate: `${data.orderDate}T00:00:00Z`,
-      status: data.status,
-      notes: data.notes
+      request: {
+        instrumentId: data.instrumentId,
+        orderDate: `${data.orderDate}T00:00:00Z`,
+        status: data.status,
+        notes: data.notes?.trim() || "-"
+      }
     }) 
   }),
-  delete: (id) => apiRequest(`/orders/${id}`, { method: 'DELETE' }),
-  updateStatus: (id, status) => apiRequest(`/orders/${id}/status`, { 
-    method: 'PATCH', 
-    body: JSON.stringify({ status }) 
-  })
+
+
+
+  delete: (id) => apiRequest(`/orders/${id}`, { method: 'DELETE' })
 },
+
 
 
   services: {

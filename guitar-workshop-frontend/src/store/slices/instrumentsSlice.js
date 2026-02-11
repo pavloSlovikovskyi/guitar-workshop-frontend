@@ -143,7 +143,7 @@ const instrumentsSlice = createSlice({
         if (action.payload && action.payload.id) {
           const index = state.items.findIndex(i => i.id === action.payload.id)
           if (index !== -1) {
-            state.items[index] = action.payload // ✅ Повний об'єкт
+            state.items[index] = action.payload
           }
         }
       })
@@ -156,6 +156,7 @@ const instrumentsSlice = createSlice({
         state.loading = true
         state.error = null
       })
+      
       .addCase(deleteInstrument.fulfilled, (state, action) => {
         state.loading = false
         state.items = state.items.filter(i => i.id !== action.payload)

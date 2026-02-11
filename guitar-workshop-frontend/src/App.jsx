@@ -3,6 +3,8 @@ import Instruments from './pages/Instruments.jsx'
 import Customers from './pages/Customers.jsx'
 import Services from './pages/Services.jsx'
 import Passports from './pages/Passports.jsx'
+import Orders from './pages/Orders.jsx'
+
 import './index.css'
 
 function App() {
@@ -27,7 +29,9 @@ function App() {
                   { to: '/instruments', label: 'Інструменти', icon: '🎸' },
                   { to: '/customers', label: 'Клієнти', icon: '👥' },
                   { to: '/services', label: 'Послуги', icon: '🛠️' },
-                  { to: '/passports', label: 'Паспорти', icon: '📋' }
+                  { to: '/passports', label: 'Паспорти', icon: '📋' },
+                  { to: '/orders', label: 'Замовлення', icon: '📦' },
+
                 ].map(({ to, label, icon }) => (
                   <Link 
                     key={to}
@@ -49,7 +53,8 @@ function App() {
             <Route path="/customers" element={<Customers />} />
             <Route path="/services" element={<Services />} />
             <Route path="/passports" element={<Passports />} />
-            
+            <Route path="/orders" element={<Orders />} />
+
             <Route path="/" element={
               <div className="text-center space-y-8 max-h-screen flex flex-col justify-center items-center py-8">
                 {/* 🎨 ЛОГО + НАЗВА */}
@@ -71,7 +76,9 @@ function App() {
                     { to: '/instruments', icon: '🎸', title: 'Інструменти', desc: 'Управління гітарним парком' },
                     { to: '/customers', icon: '👥', title: 'Клієнти', desc: 'База постійних клієнтів' },
                     { to: '/services', icon: '🛠️', title: 'Послуги', desc: 'Каталог ремонтних робіт' },
-                    { to: '/passports', icon: '📋', title: 'Паспорти', desc: 'Технічна документація' }
+                    { to: '/passports', icon: '📋', title: 'Паспорти', desc: 'Технічна документація' },
+                    { to: '/orders', icon: '📦', title: 'Замовлення', desc: 'Ремонтні замовлення' }
+
                   ].map(({ to, icon, title, desc }) => (
                     <Link 
                       to={to}
