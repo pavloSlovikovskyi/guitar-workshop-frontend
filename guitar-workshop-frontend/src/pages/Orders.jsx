@@ -209,7 +209,7 @@ const handleSubmit = async (e) => {
                 onChange={e => setFormData(prev => ({ ...prev, status: e.target.value }))}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               >
-                <option value="New">Нове</option>
+                <option value="Open">Нове</option>
                 <option value="InProgress">В процесі</option>
                 <option value="Completed">Завершене</option>
                 <option value="Cancelled">Скасовано</option>

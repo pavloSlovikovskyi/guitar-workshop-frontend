@@ -93,12 +93,10 @@ orders: {
   update: (id, data) => apiRequest(`/orders/${id}`, { 
     method: 'PUT', 
     body: JSON.stringify({
-      request: {
         instrumentId: data.instrumentId,
         orderDate: `${data.orderDate}T00:00:00Z`,
         status: data.status,
         notes: data.notes?.trim() || "-"
-      }
     }) 
   }),
 
