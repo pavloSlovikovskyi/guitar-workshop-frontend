@@ -4,9 +4,11 @@ import customersReducer from './slices/customersSlice'
 import servicesReducer from './slices/servicesSlice'
 import passportsReducer from './slices/passportsSlice'
 import ordersReducer from './slices/ordersSlice'
+import authReducer from './slices/authSlice'
 
 export const store = configureStore({
   reducer: {
+    auth: authReducer,
     instruments: instrumentsReducer,
     customers: customersReducer,
     services: servicesReducer,

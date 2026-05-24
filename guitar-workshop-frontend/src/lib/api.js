@@ -1,8 +1,11 @@
-const API_BASE = '/api'
+const API_BASE = '/api' // 🔥 ВАЖЛИВО: заміни на реальний URL бекенду
 
 const apiRequest = async (url, options = {}) => {
+  const token = localStorage.getItem('token') || localStorage.getItem('authToken')
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : {}
+
   const config = {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeader, ...(options.headers || {}) },
     ...options
   }
   

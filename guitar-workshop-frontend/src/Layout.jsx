@@ -1,11 +1,21 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { logout } from './store/slices/authSlice'
 
 function Layout({ children }) {
   const location = useLocation()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const role = useSelector((state) => state.auth.role)
 
   const isActive = (path) => location.pathname === path 
     ? "text-emerald-600 font-semibold" 
     : "text-slate-600 hover:text-emerald-600 transition-colors"
+
+  const handleLogout = () => {
+    dispatch(logout())
+    navigate('/login', { replace: true })
+  }
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-gradient-to-br from-gray-50 to-emerald-50">
@@ -41,6 +51,23 @@ function Layout({ children }) {
                 <span>{label}</span>
               </Link>
             ))}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {role === 'Master' && (
+              <span className="text-xs font-semibold uppercase tracking-wide px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">
+                Майстер
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+              aria-label="Вийти"
+            >
+              <span aria-hidden="true">🚪</span>
+              <span>Вийти</span>
+            </button>
           </div>
         </nav>
       </header>
