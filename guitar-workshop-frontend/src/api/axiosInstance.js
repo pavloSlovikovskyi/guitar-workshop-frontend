@@ -7,7 +7,6 @@ const axiosInstance = axios.create({
   }
 })
 
-// Interceptor для додавання JWT токену до кожного запиту
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -21,12 +20,10 @@ axiosInstance.interceptors.request.use(
   }
 )
 
-// Interceptor для обробки помилок (опціонально)
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Токен просрочився або невалідний
       localStorage.removeItem('token')
       localStorage.removeItem('authToken')
       localStorage.removeItem('userRole')

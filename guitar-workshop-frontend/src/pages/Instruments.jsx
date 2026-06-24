@@ -115,13 +115,13 @@ export default function Instruments() {
   if (loading && instruments.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <div className="text-xl text-gray-500">Завантажуємо інструменти... ⏳</div>
+        <div className="text-xl text-black">Завантажуємо інструменти...</div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto px-4 py-8">
+    <div className="space-y-12 max-w-7xl mx-auto px-4 py-10 text-left">
       <InstrumentsHeader count={instruments.length} onAdd={() => { setShowForm(true); resetForm() }} loading={loading} />
       
       {error && <InstrumentsError message={error} onClear={() => dispatch(clearError())} />}

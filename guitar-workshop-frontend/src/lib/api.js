@@ -1,4 +1,4 @@
-const API_BASE = '/api' // 🔥 ВАЖЛИВО: заміни на реальний URL бекенду
+const API_BASE = '/api' 
 
 const apiRequest = async (url, options = {}) => {
   const token = localStorage.getItem('token') || localStorage.getItem('authToken')
@@ -20,7 +20,6 @@ const apiRequest = async (url, options = {}) => {
     throw new Error(`API Error ${response.status}: ${errorText || 'Unknown error'}`)
   }
   
-  // ✅ Перевіряємо чи є body перед json()
   const contentType = response.headers.get('content-type')
   if (contentType && contentType.includes('application/json')) {
     const data = await response.json()
@@ -44,19 +43,15 @@ export const api = {
   getById: (id) => apiRequest(`/instruments/${id}`),
   create: (data) => apiRequest('/instruments', { method: 'POST', body: JSON.stringify(data) }),
   
-  // 🔥 ПОВНА версія з await + правильним return
   update: async (id, data) => {
     try {
-      // 1. Повне оновлення (model, serialNumber, дата, customer)
       await apiRequest(`/instruments/${id}`, { 
         method: 'PUT', 
         body: JSON.stringify(data) 
       });
       
-      // 2. Оновлення статусу (окрема команда на бекенді)
       await api.instruments.updateStatus(id, data.status);
       
-      // 3. ПОВЕРТАЄМ повний об'єкт для Redux slice
       return { 
         id, 
         model: data.model,
@@ -67,7 +62,7 @@ export const api = {
       };
     } catch (error) {
       console.error('❌ Update failed:', error);
-      throw error; // Перекидаємо в Redux для обробки
+      throw error;
     }
   },
   
@@ -113,7 +108,7 @@ orders: {
   services: {
     getAll: () => apiRequest('/services'),
     create: (data) => apiRequest('/services', { method: 'POST', body: JSON.stringify(data) }),
-    update: async (id, data) => { // 🔥 ТАКИЙ САМИЙ як для instruments!
+    update: async (id, data) => {
       await apiRequest(`/services/${id}`, { method: 'PUT', body: JSON.stringify(data) });
       return { id, ...data };
     },

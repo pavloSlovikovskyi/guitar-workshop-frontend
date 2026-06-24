@@ -89,11 +89,11 @@ export default function Services() {
   }
 
   if (loading && services.length === 0) {
-    return <div className="flex justify-center items-center min-h-[400px]"><div className="text-xl text-gray-500">Завантажуємо послуги... ⏳</div></div>
+    return <div className="flex justify-center items-center min-h-[400px]"><div className="text-xl text-black">Завантажуємо послуги...</div></div>
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto px-4 py-8">
+    <div className="space-y-12 max-w-7xl mx-auto px-4 py-10 text-left">
       <ServicesHeader count={services.length} onAdd={() => { setShowForm(true); resetForm() }} loading={loading} />
       
       {error && <ServicesError message={error} onClear={() => dispatch(clearError())} />}

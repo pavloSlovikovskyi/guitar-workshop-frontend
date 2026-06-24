@@ -1,22 +1,36 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { loginUser, clearError } from '../store/slices/authSlice'
+import { Link, useNavigate } from 'react-router-dom'
+import { jwtDecode } from 'jwt-decode'
+import { loginUser, clearError, setRole, logout } from '../store/slices/authSlice'
+import { authService } from '../api/authService'
+
+const getRoleFromToken = (token) => {
+  if (!token) return null
+
+  try {
+    const decoded = jwtDecode(token)
+    return (
+      decoded.role ||
+      decoded.Role ||
+      decoded.roles ||
+      decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+      decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/roles'] ||
+      null
+    )
+  } catch {
+    return null
+  }
+}
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth)
-
-  // Редирект на головну сторінку після успішного входу
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/')
-    }
-  }, [isAuthenticated, navigate])
+  const { loading, error } = useSelector((state) => state.auth)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -25,7 +39,49 @@ export default function Login() {
       return
     }
 
-    dispatch(loginUser({ email, password }))
+    setIsLoading(true)
+    await new Promise((resolve) => setTimeout(resolve, 50))
+
+    try {
+      const loginPayload = await dispatch(loginUser({ email, password })).unwrap()
+      const token = loginPayload?.token
+      if (token) {
+        localStorage.setItem('token', token)
+      }
+
+      const resolvedRole =
+        loginPayload?.role ||
+        loginPayload?.Role ||
+        loginPayload?.userRole ||
+        loginPayload?.user?.role ||
+        getRoleFromToken(token)
+
+      if (resolvedRole) {
+        localStorage.setItem('userRole', resolvedRole)
+      }
+
+      const profile = await authService.me()
+      const profileRole =
+        profile?.role ||
+        profile?.Role ||
+        profile?.userRole ||
+        profile?.user?.role ||
+        null
+      const finalRole = profileRole || resolvedRole
+
+      if (finalRole) {
+        localStorage.setItem('userRole', finalRole)
+      }
+
+      dispatch(setRole(finalRole))
+      const roleLower = finalRole ? finalRole.toLowerCase() : null
+      navigate(roleLower === 'master' ? '/admin/orders' : '/orders', { replace: true })
+    } catch (err) {
+      console.error(err)
+      dispatch(logout())
+      setIsLoading(false)
+      navigate('/login', { replace: true })
+    }
   }
 
   const handleErrorClose = () => {
@@ -33,19 +89,16 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        {/* Заголовок */}
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+      <div className="w-full max-w-lg bg-white border-4 border-black p-10">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Guitar Workshop</h1>
-          <p className="text-gray-600">Вхід в обліковий запис</p>
+          <h1 className="text-5xl font-black uppercase tracking-tighter mb-4">Вхід</h1>
+          <p className="text-sm font-medium text-black">Вхід в обліковий запис</p>
         </div>
 
-        {/* Форма */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-black uppercase text-black mb-2">
               Email адреса
             </label>
             <input
@@ -54,15 +107,14 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+              className="w-full border-2 border-black p-4 bg-white text-lg rounded-none focus:ring-0 focus:outline-none"
               required
-              disabled={loading}
+              disabled={loading || isLoading}
             />
           </div>
 
-          {/* Пароль */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-black uppercase text-black mb-2">
               Пароль
             </label>
             <input
@@ -71,36 +123,34 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+              className="w-full border-2 border-black p-4 bg-white text-lg rounded-none focus:ring-0 focus:outline-none"
               required
-              disabled={loading}
+              disabled={loading || isLoading}
             />
           </div>
 
-          {/* Повідомлення про помилку */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start justify-between">
+            <div className="bg-white border-2 border-black p-4 flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-red-800">Помилка входу</p>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
+                <p className="text-sm font-black uppercase">Помилка входу</p>
+                <p className="text-sm font-medium text-black mt-1">{error}</p>
               </div>
               <button
                 type="button"
                 onClick={handleErrorClose}
-                className="text-red-400 hover:text-red-600 transition"
+                className="text-black font-black"
               >
                 ✕
               </button>
             </div>
           )}
 
-          {/* Кнопка входу */}
           <button
             type="submit"
-            disabled={loading || !email || !password}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+            disabled={loading || isLoading || !email || !password}
+            className="w-full bg-black text-white border-2 border-black py-3 text-sm font-black uppercase hover:bg-white hover:text-black transition-all rounded-none disabled:opacity-60"
           >
-            {loading ? (
+            {loading || isLoading ? (
               <>
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                   <circle
@@ -118,7 +168,7 @@ export default function Login() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                <span>Завантаження...</span>
+                <span>Вхід...</span>
               </>
             ) : (
               'Увійти'
@@ -126,12 +176,11 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Посилання на реєстрацію (опціонально) */}
-        <p className="text-center text-gray-600 text-sm mt-6">
+        <p className="text-center text-sm font-medium text-black mt-6">
           Немаєте облікового запису?{' '}
-          <a href="/register" className="text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link to="/register" className="font-black underline">
             Зареєструватися
-          </a>
+          </Link>
         </p>
       </div>
     </div>

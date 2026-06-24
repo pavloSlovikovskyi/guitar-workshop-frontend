@@ -4,7 +4,7 @@ export default function ServicesList({ services, loading, onEdit, onDelete }) {
   if (loading) return null
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 text-left">
       {services.map((service, index) => (
         <ServiceCard
           key={service.id || index}

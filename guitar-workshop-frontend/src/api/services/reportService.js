@@ -9,10 +9,9 @@ export const downloadOrdersReport = async (format = 'Excel') => {
   try {
     const response = await axiosInstance.get('/reports/orders', {
       params: { format },
-      responseType: 'blob' // Важливо для отримання файлу
+      responseType: 'blob'
     })
 
-    // Визначаємо розширення файлу на основі формату
     const fileExtensions = {
       Pdf: 'pdf',
       Excel: 'xlsx',
@@ -22,19 +21,15 @@ export const downloadOrdersReport = async (format = 'Excel') => {
     const extension = fileExtensions[format] || 'bin'
     const fileName = `orders-report-${new Date().toISOString().split('T')[0]}.${extension}`
 
-    // Створюємо об'єкт Blob з отриманих даних
     const url = URL.createObjectURL(response.data)
 
-    // Створюємо тимчасовий елемент <a> для завантаження
     const link = document.createElement('a')
     link.href = url
     link.download = fileName
     document.body.appendChild(link)
 
-    // Запускаємо завантаження
     link.click()
 
-    // Очищуємо ресурси
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
   } catch (error) {
@@ -45,7 +40,7 @@ export const downloadOrdersReport = async (format = 'Excel') => {
 
 /**
  * Альтернативна функція для отримання звіту як Blob (без автоматичного завантаження)
- * @param {string} format - Формат звіту: 'Pdf', 'Excel', 'Word'
+ * @param {string} format - Формат звіту: 'Pdf', 'Excel'
  * @returns {Promise<Blob>}
  */
 export const getOrdersReportBlob = async (format = 'Excel') => {

@@ -4,7 +4,7 @@ export default function PassportsList({ passportsWithInstruments, loading, onEdi
   if (loading) return null
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 text-left">
       {passportsWithInstruments.map((passport) => (
         <PassportCard
           key={passport.id}
